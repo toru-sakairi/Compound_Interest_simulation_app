@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>複利シミュレーション</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>複利シミュレーション</h1>
+
+        <form action="{{ url_for('inputData') }}" method="POST">
+            <!-- フォームの入力項目を横並びにするための行 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>元本</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="principal" value="{{ input_principal or '100' }}" required>
+                        <span class="unit">万円</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>年利率</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="rate" step="0.1" value="{{ input_rate or '5' }}" required>
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>運用年数</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="years" value="{{ input_years or '20' }}" required>
+                        <span class="unit">年</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit">計算する</button>
+        </form>
+
+        <!-- 計算結果がある場合のみ表示 -->
+        {% if result %}
+        <hr>
+
+        <!-- 結果表示をカードで囲む -->
+        <div class="result-card">
+            <h2>将来の運用資産額</h2>
+            <p class="result-amount">
+                {{ "{:,.2f}".format(result) }}<span>万円</span>
+            </p>
+        </div>
+
+        <!-- グラフ描画エリア -->
+        <div style="width: 100%; max-width: 600px; margin: 40px auto 0;">
+            <h3>資産推移グラフ</h3>
+            <canvas id="assetChart"></canvas>
+        </div>
+        {% endif %}
+
+    </div> <!-- .container の閉じタグ -->
+
+
+    <!-- グラフ用のデータとスクリプト読み込み (ここは変更なし) -->
+    {% if asset_history and year_labels %}
+    <div id="chart-data"
+         data-labels='{{ year_labels|tojson }}'
+         data-history='{{ asset_history|tojson }}'
+         style="display: none;">
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/chart-renderer.js') }}" defer></script>
+</body>
+
+</html>

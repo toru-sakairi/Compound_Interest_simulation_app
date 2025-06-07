@@ -1,0 +1,152 @@
+/* 全体のフォントと、新しい背景色を設定 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f3f9f3; /* 優しい緑色 */
+    color: #333;
+    margin: 0;
+}
+
+/* 全体を囲むカードデザインのコンテナ */
+.container {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 700px;
+    box-sizing: border-box;
+    margin: 40px auto; /* 上下に余白、左右は自動で中央寄せ */
+}
+
+/* 見出しのスタイル */
+h1 {
+    text-align: center;
+    color: #00695c; /* 濃い緑色 */
+    margin-bottom: 30px;
+}
+
+h2, h3 {
+    text-align: center;
+    color: #37474f; /* 少し濃い灰色 */
+}
+
+/* ---- フォームの横並びレイアウト ---- */
+.form-row {
+    display: flex; /* 子要素を横並びにする */
+    gap: 20px; /* 要素間の隙間 */
+    margin-bottom: 25px;
+}
+
+.form-group {
+    flex: 1; /* 横幅を均等に分ける */
+    text-align: center;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group .input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0 10px;
+}
+
+.form-group input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 12px 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    /* スピナー（上下矢印）を消す */
+    -moz-appearance: textfield;
+}
+.form-group input::-webkit-outer-spin-button,
+.form-group input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.form-group .unit {
+    font-weight: bold;
+    color: #888;
+}
+/* ---------------------------------- */
+
+
+/* 計算ボタンのスタイル */
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(to bottom, #ff9800, #f57c00); /* オレンジ色のグラデーション */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    transform: translateY(-2px); /* 少し浮き上がる */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* 区切り線 */
+hr {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 40px 0;
+}
+
+/* ---- 結果表示カード ---- */
+.result-card {
+    background-color: #fffde7; /* 薄い黄色 */
+    border: 2px solid #ffca28; /* 少し濃い黄色 */
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.result-card h2 {
+    margin-top: 0;
+    color: #f57c00;
+}
+
+.result-amount {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #ef6c00;
+}
+
+.result-amount span {
+    font-size: 0.6em;
+    font-weight: normal;
+    margin-left: 5px;
+}
+/* ------------------------- */
+
+
+/* スマートフォン向けの調整 */
+@media (max-width: 600px) {
+    .container {
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .form-row {
+        flex-direction: column; /* 横並びを縦並びに変更 */
+        gap: 15px;
+    }
+    h1 { font-size: 1.8em; }
+    .result-amount { font-size: 2em; }
+}
