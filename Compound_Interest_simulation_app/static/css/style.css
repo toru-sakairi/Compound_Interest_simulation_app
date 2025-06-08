@@ -150,3 +150,33 @@ hr {
     h1 { font-size: 1.8em; }
     .result-amount { font-size: 2em; }
 }
+
+.tab-container {
+    display: flex;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 10px;
+    border: none;
+    background-color: transparent;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    transform: translateY(2px);
+}
+
+.tab-button.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+}
+
+/* 非表示にするためのクラス */
+.hidden {
+    display: none;
+}

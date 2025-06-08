@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         beginAtZero: false,
                         ticks: {
                             callback: function (value, index, values) {
-                                return value.toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' });
+                                return value + "万円";
                             }
                         }
                     }

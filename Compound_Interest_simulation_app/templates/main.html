@@ -12,27 +12,50 @@
     <div class="container">
         <h1>複利シミュレーション</h1>
 
-        <form action="{{ url_for('inputData') }}" method="POST">
-            <!-- フォームの入力項目を横並びにするための行 -->
-            <div class="form-row">
+        <!-- ★★★ タブ切り替えUI ★★★ -->
+        <div class="tab-container">
+            <button class="tab-button active" data-tab="lump_sum">一括投資</button>
+            <button class="tab-button" data-tab="installment">積立投資</button>
+        </div>
+
+        <form action="{{ url_for('calculate') }}" method="POST">
+            <!-- どの計算タイプかを送信するための隠しフィールド -->
+            <input type="hidden" id="calculation_type" name="calculation_type" value="lump_sum">
+            
+            <!-- ★★★ タブコンテンツ ★★★ -->
+            <div id="lump_sum_content" class="tab-content">
                 <div class="form-group">
-                    <label>元本</label>
+                    <label>初期投資額</label>
                     <div class="input-wrapper">
-                        <input type="number" name="principal" value="{{ input_principal or '100' }}" required>
+                        <input type="number" name="principal" value="{{ inputs.principal or '100' }}" >
                         <span class="unit">万円</span>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>年利率</label>
+            </div>
+
+            <div id="installment_content" class="tab-content hidden">
+                 <div class="form-group">
+                    <label>毎月の積立額</label>
                     <div class="input-wrapper">
-                        <input type="number" name="rate" step="0.1" value="{{ input_rate or '5' }}" required>
+                        <input type="number" name="monthly_investment" value="{{ inputs.monthly_investment or '3' }}">
+                        <span class="unit">万円</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 共通の入力項目 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>想定年利</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="rate" step="0.1" value="{{ inputs.rate or '5' }}" required>
                         <span class="unit">%</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>運用年数</label>
+                    <label>積立期間</label>
                     <div class="input-wrapper">
-                        <input type="number" name="years" value="{{ input_years or '20' }}" required>
+                        <input type="number" name="years" value="{{ inputs.years or '20' }}" required>
                         <span class="unit">年</span>
                     </div>
                 </div>
@@ -74,6 +97,40 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='js/chart-renderer.js') }}" defer></script>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('.tab-button');
+        const contents = document.querySelectorAll('.tab-content');
+        const calcTypeInput = document.getElementById('calculation_type');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // すべてのタブからactiveクラスを削除
+                tabs.forEach(t => t.classList.remove('active'));
+                // クリックされたタブにactiveクラスを追加
+                tab.classList.add('active');
+                
+                // 対応するタブのIDを取得
+                const targetId = tab.dataset.tab + '_content';
+                
+                // すべてのコンテンツを非表示に
+                contents.forEach(c => c.classList.add('hidden'));
+                // 対応するコンテンツを表示
+                document.getElementById(targetId).classList.remove('hidden');
+                
+                // 隠しフィールドの値を更新
+                calcTypeInput.value = tab.dataset.tab;
+            });
+        });
+
+        // ページ読み込み時に、Pythonから渡された計算タイプに基づいてタブを復元
+        const currentType = '{{ inputs.type or "lump_sum" }}';
+        document.querySelector(`.tab-button[data-tab="${currentType}"]`).click();
+    });
+    </script>
+
 </body>
 
 </html>
