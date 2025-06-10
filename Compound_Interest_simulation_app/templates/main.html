@@ -6,57 +6,98 @@
     <title>複利シミュレーション</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
+    <style>
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
         <h1>複利シミュレーション</h1>
 
-        <!-- ★★★ タブ切り替えUI ★★★ -->
         <div class="tab-container">
-            <button class="tab-button active" data-tab="lump_sum">一括投資</button>
-            <button class="tab-button" data-tab="installment">積立投資</button>
+            <button class="tab-button active" data-tab="total">将来いくらになる</button>
+            <button class="tab-button" data-tab="years">何年積み立てる</button>
+            <button class="tab-button" data-tab="monthly_investment">毎月いくら積み立てる</button>
         </div>
 
-        <form action="{{ url_for('calculate') }}" method="POST">
-            <!-- どの計算タイプかを送信するための隠しフィールド -->
-            <input type="hidden" id="calculation_type" name="calculation_type" value="lump_sum">
-            
-            <!-- ★★★ タブコンテンツ ★★★ -->
-            <div id="lump_sum_content" class="tab-content">
+        <form action="{{ url_for('calculates') }}" method="POST">
+            <input type="hidden" id="calculation_type" name="calculation_type" value="total">
+
+            <div id="total_content" class="tab-content">
                 <div class="form-group">
                     <label>初期投資額</label>
                     <div class="input-wrapper">
-                        <input type="number" name="principal" value="{{ inputs.principal or '100' }}" >
+                        <input type="number" name="principal" value="{{ outputs.principal | default(0) | round(2) }}"
+                            step="any">
                         <span class="unit">万円</span>
                     </div>
-                </div>
-            </div>
-
-            <div id="installment_content" class="tab-content hidden">
-                 <div class="form-group">
-                    <label>毎月の積立額</label>
+                    <label>積立額</label>
                     <div class="input-wrapper">
-                        <input type="number" name="monthly_investment" value="{{ inputs.monthly_investment or '3' }}">
+                        <input type="number" name="monthly_investment"
+                            value="{{ outputs.monthly_investment | default(5) | round(2) }}" step="any">
+                        <span class="unit">万円</span>
+                    </div>
+                    <label>期間</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="years" value="{{ outputs.years | default(10) }}" step="any">
+                        <span class="unit">年</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="monthly_investment_content" class="tab-content hidden">
+                <div class="form-group">
+                    <label>初期投資額</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="principal" value="{{ outputs.principal | default(0) | round(2) }}"
+                            step="any">
+                        <span class="unit">万円</span>
+                    </div>
+                    <label>目標金額</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="total" value="{{ outputs.total | default(1000) | round(2) }}"
+                            step="any">
+                        <span class="unit">万円</span>
+                    </div>
+                    <label>期間</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="years" value="{{ outputs.years | default(10) }}" step="any">
+                        <span class="unit">年</span>
+                    </div>
+                </div>
+            </div>
+            <div id="years_content" class="tab-content hidden">
+                <div class="form-group">
+                    <label>初期投資額</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="principal" value="{{ outputs.principal | default(0) | round(2) }}"
+                            step="any">
+                        <span class="unit">万円</span>
+                    </div>
+                    <label>目標金額</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="total" value="{{ outputs.total | default(1000) | round(2) }}"
+                            step="any">
+                        <span class="unit">万円</span>
+                    </div>
+                    <label>積立額</label>
+                    <div class="input-wrapper">
+                        <input type="number" name="monthly_investment"
+                            value="{{ outputs.monthly_investment | default(5) | round(2) }}" step="any">
                         <span class="unit">万円</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 共通の入力項目 -->
             <div class="form-row">
                 <div class="form-group">
                     <label>想定年利</label>
                     <div class="input-wrapper">
-                        <input type="number" name="rate" step="0.1" value="{{ inputs.rate or '5' }}" required>
+                        <input type="number" name="rate" step="0.1" value="{{ outputs.rate | default(5) }}" required>
                         <span class="unit">%</span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>積立期間</label>
-                    <div class="input-wrapper">
-                        <input type="number" name="years" value="{{ inputs.years or '20' }}" required>
-                        <span class="unit">年</span>
                     </div>
                 </div>
             </div>
@@ -64,34 +105,45 @@
             <button type="submit">計算する</button>
         </form>
 
-        <!-- 計算結果がある場合のみ表示 -->
-        {% if result %}
-        <hr>
+        <div id="result-container">
+            {% if outputs and outputs.type != 'initial' %}
+            <hr>
 
-        <!-- 結果表示をカードで囲む -->
-        <div class="result-card">
-            <h2>将来の運用資産額</h2>
-            <p class="result-amount">
-                {{ "{:,.2f}".format(result) }}<span>万円</span>
-            </p>
+            <div class="result-card">
+                {% if outputs.type == 'total' and outputs.total is defined %}
+                <h2>将来いくらになる</h2>
+                <p class="result-amount">
+                    {{ "{:,.2f}".format(outputs.total) }}
+                    <span>万円</span>
+                </p>
+
+                {% elif outputs.type == 'monthly_investment' and outputs.monthly_investment is defined %}
+                <h2>毎月いくら積み立てる</h2>
+                <p class="result-amount">
+                    {{ "{:,.2f}".format(outputs.monthly_investment) }}
+                    <span>万円</span>
+                </p>
+
+                {% elif outputs.type == 'years' and outputs.years is defined %}
+                <h2>何年積み立てる</h2>
+                <p class="result-amount">
+                    {{ "{:.1f}".format(outputs.years) }}
+                    <span>年</span>
+                </p>
+
+                {% endif %}
+            </div>
+
+            <div style="width: 100%; max-width: 600px; margin: 40px auto 0;">
+                <h3>資産推移グラフ</h3>
+                <canvas id="assetChart"></canvas>
+            </div>
+            {% endif %}
         </div>
 
-        <!-- グラフ描画エリア -->
-        <div style="width: 100%; max-width: 600px; margin: 40px auto 0;">
-            <h3>資産推移グラフ</h3>
-            <canvas id="assetChart"></canvas>
-        </div>
-        {% endif %}
-
-    </div> <!-- .container の閉じタグ -->
-
-
-    <!-- グラフ用のデータとスクリプト読み込み (ここは変更なし) -->
-    {% if asset_history and year_labels %}
-    <div id="chart-data"
-         data-labels='{{ year_labels|tojson }}'
-         data-history='{{ asset_history|tojson }}'
-         style="display: none;">
+    </div> {% if asset_history and year_labels %}
+    <div id="chart-data" data-labels='{{ year_labels|tojson }}' data-history='{{ asset_history|tojson }}'
+        style="display: none;">
     </div>
     {% endif %}
 
@@ -100,35 +152,63 @@
 
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const tabs = document.querySelectorAll('.tab-button');
-        const contents = document.querySelectorAll('.tab-content');
-        const calcTypeInput = document.getElementById('calculation_type');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // すべてのタブからactiveクラスを削除
-                tabs.forEach(t => t.classList.remove('active'));
-                // クリックされたタブにactiveクラスを追加
-                tab.classList.add('active');
-                
-                // 対応するタブのIDを取得
-                const targetId = tab.dataset.tab + '_content';
-                
-                // すべてのコンテンツを非表示に
-                contents.forEach(c => c.classList.add('hidden'));
-                // 対応するコンテンツを表示
-                document.getElementById(targetId).classList.remove('hidden');
-                
-                // 隠しフィールドの値を更新
-                calcTypeInput.value = tab.dataset.tab;
-            });
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+            const calcTypeInput = document.getElementById('calculation_type');
+            const form = document.querySelector('form');
 
-        // ページ読み込み時に、Pythonから渡された計算タイプに基づいてタブを復元
-        const currentType = '{{ inputs.type or "lump_sum" }}';
-        document.querySelector(`.tab-button[data-tab="${currentType}"]`).click();
-    });
+            // HTMLの初期値と合わせたデフォルト値
+            const defaultValues = {
+                principal: 0,
+                monthly_investment: 5,
+                years: 10,
+                total: 1000,
+                rate: 5
+            };
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // タブのアクティブ状態を切り替え
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // 表示するコンテンツを切り替え
+                    const targetId = tab.dataset.tab + '_content';
+                    contents.forEach(c => c.classList.add('hidden'));
+                    document.getElementById(targetId).classList.remove('hidden');
+
+                    // 隠しフィールドの値を更新
+                    calcTypeInput.value = tab.dataset.tab;
+
+                    // --- 1. 結果表示とグラフを非表示にする ---
+                    const resultContainer = document.getElementById('result-container');
+                    if (resultContainer) {
+                        resultContainer.classList.add('hidden');
+                    }
+
+                    // --- 2. すべての入力値をデフォルトに戻す ---
+                    // ▼▼▼ この部分が有効になっています ▼▼▼
+                    form.querySelectorAll('input[type="number"]').forEach(input => {
+                        if (defaultValues.hasOwnProperty(input.name)) {
+                            input.value = defaultValues[input.name];
+                        }
+                    });
+                });
+            });
+
+            // ページ読み込み時のタブ復元処理
+            const currentType = '{{ outputs.type | default("total") }}';
+            const currentTab = document.querySelector(`.tab-button[data-tab="${currentType}"]`);
+            if (currentTab) {
+                tabs.forEach(t => t.classList.remove('active'));
+                currentTab.classList.add('active');
+                const targetId = currentTab.dataset.tab + '_content';
+                contents.forEach(c => c.classList.add('hidden'));
+                document.getElementById(targetId).classList.remove('hidden');
+                calcTypeInput.value = currentTab.dataset.tab;
+            }
+        });
     </script>
 
 </body>
