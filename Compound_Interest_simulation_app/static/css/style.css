@@ -94,6 +94,7 @@ h2, h3 {
 button[type="submit"] {
     width: 100%;
     padding: 15px;
+    margin-top: 30px; 
     background: linear-gradient(to bottom, #ff9800, #f57c00); /* オレンジ色のグラデーション */
     color: white;
     border: none;

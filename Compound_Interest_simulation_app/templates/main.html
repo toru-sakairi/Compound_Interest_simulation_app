@@ -31,18 +31,18 @@
                     <label>初期投資額</label>
                     <div class="input-wrapper">
                         <input type="number" name="principal" value="{{ outputs.principal | default(0) | round(2) }}"
-                            step="any">
+                            step="any" disabled>
                         <span class="unit">万円</span>
                     </div>
                     <label>積立額</label>
                     <div class="input-wrapper">
                         <input type="number" name="monthly_investment"
-                            value="{{ outputs.monthly_investment | default(5) | round(2) }}" step="any">
+                            value="{{ outputs.monthly_investment | default(5) | round(2) }}" step="any" disabled>
                         <span class="unit">万円</span>
                     </div>
                     <label>期間</label>
                     <div class="input-wrapper">
-                        <input type="number" name="years" value="{{ outputs.years | default(10) }}" step="any">
+                        <input type="number" name="years" value="{{ outputs.years | default(10) }}" step="any" disabled>
                         <span class="unit">年</span>
                     </div>
                 </div>
@@ -53,18 +53,18 @@
                     <label>初期投資額</label>
                     <div class="input-wrapper">
                         <input type="number" name="principal" value="{{ outputs.principal | default(0) | round(2) }}"
-                            step="any">
+                            step="any" disabled>
                         <span class="unit">万円</span>
                     </div>
                     <label>目標金額</label>
                     <div class="input-wrapper">
                         <input type="number" name="total" value="{{ outputs.total | default(1000) | round(2) }}"
-                            step="any">
+                            step="any" disabled>
                         <span class="unit">万円</span>
                     </div>
                     <label>期間</label>
                     <div class="input-wrapper">
-                        <input type="number" name="years" value="{{ outputs.years | default(10) }}" step="any">
+                        <input type="number" name="years" value="{{ outputs.years | default(10) }}" step="any" disabled>
                         <span class="unit">年</span>
                     </div>
                 </div>
@@ -74,19 +74,19 @@
                     <label>初期投資額</label>
                     <div class="input-wrapper">
                         <input type="number" name="principal" value="{{ outputs.principal | default(0) | round(2) }}"
-                            step="any">
+                            step="any" disabled>
                         <span class="unit">万円</span>
                     </div>
                     <label>目標金額</label>
                     <div class="input-wrapper">
                         <input type="number" name="total" value="{{ outputs.total | default(1000) | round(2) }}"
-                            step="any">
+                            step="any" disabled>
                         <span class="unit">万円</span>
                     </div>
                     <label>積立額</label>
                     <div class="input-wrapper">
                         <input type="number" name="monthly_investment"
-                            value="{{ outputs.monthly_investment | default(5) | round(2) }}" step="any">
+                            value="{{ outputs.monthly_investment | default(5) | round(2) }}" step="any" disabled>
                         <span class="unit">万円</span>
                     </div>
                 </div>
@@ -158,7 +158,6 @@
             const calcTypeInput = document.getElementById('calculation_type');
             const form = document.querySelector('form');
 
-            // HTMLの初期値と合わせたデフォルト値
             const defaultValues = {
                 principal: 0,
                 monthly_investment: 5,
@@ -167,28 +166,45 @@
                 rate: 5
             };
 
+            // タブ切り替え時の処理をまとめた関数
+            function switchTab(tab) {
+                const targetId = tab.dataset.tab + '_content';
+                const targetContent = document.getElementById(targetId);
+
+                // 全てのタブのスタイルをリセット
+                tabs.forEach(t => t.classList.remove('active'));
+                // クリックされたタブをアクティブに
+                tab.classList.add('active');
+
+                // 全てのコンテンツを非表示にし、入力欄を無効化
+                contents.forEach(c => {
+                    c.classList.add('hidden');
+                    c.querySelectorAll('input[type="number"]').forEach(input => {
+                        input.disabled = true;
+                    });
+                });
+
+                // 対象のコンテンツを表示し、その中の入力欄を有効化
+                targetContent.classList.remove('hidden');
+                targetContent.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.disabled = false;
+                });
+
+                // 隠しフィールドの値を更新
+                calcTypeInput.value = tab.dataset.tab;
+            }
+
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    // タブのアクティブ状態を切り替え
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
+                    // タブを切り替える
+                    switchTab(tab);
 
-                    // 表示するコンテンツを切り替え
-                    const targetId = tab.dataset.tab + '_content';
-                    contents.forEach(c => c.classList.add('hidden'));
-                    document.getElementById(targetId).classList.remove('hidden');
-
-                    // 隠しフィールドの値を更新
-                    calcTypeInput.value = tab.dataset.tab;
-
-                    // --- 1. 結果表示とグラフを非表示にする ---
+                    // --- ここからがタブクリック時のリセット処理 ---
                     const resultContainer = document.getElementById('result-container');
                     if (resultContainer) {
                         resultContainer.classList.add('hidden');
                     }
 
-                    // --- 2. すべての入力値をデフォルトに戻す ---
-                    // ▼▼▼ この部分が有効になっています ▼▼▼
                     form.querySelectorAll('input[type="number"]').forEach(input => {
                         if (defaultValues.hasOwnProperty(input.name)) {
                             input.value = defaultValues[input.name];
@@ -201,12 +217,8 @@
             const currentType = '{{ outputs.type | default("total") }}';
             const currentTab = document.querySelector(`.tab-button[data-tab="${currentType}"]`);
             if (currentTab) {
-                tabs.forEach(t => t.classList.remove('active'));
-                currentTab.classList.add('active');
-                const targetId = currentTab.dataset.tab + '_content';
-                contents.forEach(c => c.classList.add('hidden'));
-                document.getElementById(targetId).classList.remove('hidden');
-                calcTypeInput.value = currentTab.dataset.tab;
+                // タブの表示を切り替える（入力欄のdisabled状態も設定される）
+                switchTab(currentTab);
             }
         });
     </script>
